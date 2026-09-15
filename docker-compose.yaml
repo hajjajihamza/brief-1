@@ -42,6 +42,21 @@ services:
     networks:
       - brif_network
 
+  airflow:
+    image: apache/airflow:3.3.1
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@postgres:5432/${AIRFLOW_DB}
+    volumes:
+      - ./dags:/opt/airflow/dags
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    networks:
+      - brif_network
+    command: airflow standalone # Cette command pour installer touts les composent de airflow automatique
+
 volumes:
   postgres_data:
 
