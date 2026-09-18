@@ -4,9 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./src:/app/src
+      - .:/app
+      - venv:/app/.venv
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PSEUDONYMIZATION_SALT: ${PSEUDONYMIZATION_SALT}
+      PYTHONPATH: /app
     depends_on:
       postgres:
         condition: service_healthy
@@ -21,6 +24,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./includes/sql/staging.sql:/docker-entrypoint-initdb.d/staging.sql:ro
+      - ./includes/sql/core.sql:/docker-entrypoint-initdb.d/core.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -59,6 +64,7 @@ services:
 
 volumes:
   postgres_data:
+  venv:
 
 networks:
   brif_network:
