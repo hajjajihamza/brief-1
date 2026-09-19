@@ -8,4 +8,4 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv sync --locked --no-install-project
 
-CMD ["uv", "run", "python", "src/main.py"]
+#CMD ["uv", "run", "python", "src/main.py"]

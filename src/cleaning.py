@@ -1,16 +1,12 @@
 import pandas as pd
 import numpy as np
 from config.pseudonymisation import pseudonymize
-from extraction import extract
 
-df = extract('data/row.csv')
-
-def duplicate_data():
-    global df
+def duplicate_data(df):
     df = df.drop_duplicates()
+    return df
 
-def text_cleaning():
-    global df
+def text_cleaning(df):
     cols = ['Customer Name', 'City', 'State', 'Region', 'Category', 'Segment', 'Sub-Category', 'Product Name',
             'Product ID']
     df.loc[:, cols] = df[cols].apply(lambda x: x.str.strip().str.lower())
@@ -21,9 +17,9 @@ def text_cleaning():
         'home ofice': 'home office',
     }
     df.loc[:, "Segment"] = df['Segment'].replace(corr)
+    return df
 
-def data_types_parsing():
-    global df
+def data_types_parsing(df):
     # ====== Date ======
     df['Order Date'] = pd.to_datetime(df['Order Date'], format='mixed')
     df['Ship Date'] = pd.to_datetime(df['Ship Date'], format="mixed")
@@ -31,18 +27,18 @@ def data_types_parsing():
     # ====== Category, Segment, Sub-Category ======
     cols = ['Category', 'Segment', 'Sub-Category']
     df = df.astype({col: 'category' for col in cols})
+    return df
 
-def impossible_and_suspicious_values():
-    global df
+def impossible_and_suspicious_values(df):
     # ====== Quantity ======
     df = df.drop(df[df['Quantity'] < 0].index)  # msaht tout les line li quntity dyalhom < 0
     # ====== Discount ======
     df = df.drop(df[df['Discount'] > 1].index)
     # ====== Profit ======
     df = df.drop(columns=['Profit']) # msaht column dyal profit ga3
+    return df
 
-def imputation():
-    global df
+def imputation(df):
     # ====== Date ======
     mask_correct_date = df['Ship Date'] >= df['Order Date']
     ship_duration_mean = (df[mask_correct_date]['Ship Date'] - df[mask_correct_date][
@@ -109,15 +105,12 @@ def imputation():
     prefix = df['Order ID'].str[:2]
     year = df['Order Date'].dt.year.astype(str)
     df['Order ID'] = prefix + '-' + year + '-' + df['Row ID'].astype(str)
+    return df
 
-def structural_standardisation():
-    global df
+def structural_standardisation(df):
     df.columns = df.columns.str.lower().str.replace(' ', '_')
+    return df
 
-def pseudonymisation():
-    global df
+def pseudonymisation(df):
     df['customer_name'] = df['customer_name'].apply(pseudonymize)
-
-def get_data_frame():
-    global df
     return df

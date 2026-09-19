@@ -1,11 +1,16 @@
 from cleaning import *
 
-def transform():
-    duplicate_data()
-    text_cleaning()
-    data_types_parsing()
-    impossible_and_suspicious_values()
-    imputation()
-    structural_standardisation()
-    pseudonymisation()
-    return get_data_frame()
+def transform(df):
+    return pseudonymisation(
+            structural_standardisation(
+                imputation(
+                    impossible_and_suspicious_values(
+                        data_types_parsing(
+                            text_cleaning(
+                                duplicate_data(df)
+                            )
+                        )
+                    )
+                )
+            )
+        )
